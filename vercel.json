@@ -1,0 +1,6 @@
+{
+  "redirects": [
+    { "source": "/Join", "destination": "/", "permanent": false },
+    { "source": "/Join/", "destination": "/", "permanent": false }
+  ]
+}
