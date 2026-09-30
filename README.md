@@ -11,6 +11,8 @@ npm run dev
 
 Run `npm test` for submission checks and `npm run build` for a production build.
 Optional: copy `.env.example` to `.env.local` to change the hosting base path.
+Assets default to relative URLs so the build works at a domain root or a repository
+subpath. Deploy the entire `dist` directory together, including `dist/assets`.
 
 ## Registration flow
 
