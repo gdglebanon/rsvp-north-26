@@ -382,8 +382,8 @@ const App = () => {
         if (formData.activeExpCategories.length === 0) newErrors.experience = 'Please select at least one experience category';
 
         const phoneClean = (formData.phone || '').replace(/\s+/g, '');
-        if (phoneClean && !/^(?:\+961)?(03|71|76|78|79)\d{6}$/.test(phoneClean)) {
-            newErrors.phone = 'Invalid format. Use 8 digits starting with 03, 71, 76, 78, or 79';
+        if (phoneClean && !/^(?:\+961)?(03|70|71|76|78|79|81)\d{6}$/.test(phoneClean)) {
+            newErrors.phone = 'Invalid format. Use 8 digits starting with 03, 70, 71, 76, 78, 79, or 81';
         }
 
         if (!formData.linkedIn) {
@@ -526,8 +526,8 @@ const App = () => {
 
         // We also always check phone format specifically on blur if it has a value, regardless of order
         const phoneClean = (currentData.phone || '').replace(/\s+/g, '');
-        if (phoneClean && !/^(?:\+961)?(03|71|76|78|79)\d{6}$/.test(phoneClean)) {
-            tempErrors.phone = 'Invalid format. Use 8 digits starting with 03, 71, 76, 78, or 79';
+        if (phoneClean && !/^(?:\+961)?(03|70|71|76|78|79|81)\d{6}$/.test(phoneClean)) {
+            tempErrors.phone = 'Invalid format. Use 8 digits starting with 03, 70, 71, 76, 78, 79, or 81';
         }
 
         setErrors(prev => {
@@ -665,7 +665,7 @@ const App = () => {
 
                         <div className="grid-2-always contact-grid">
                             <FormField label="Phone Number" error={errors.phone}>
-                                <input type="tel" name="phone" placeholder="+961 XX XXX XXX" value={formData.phone} onChange={handleChange} onBlur={handleBlur} />
+                                <input type="tel" name="phone" placeholder="70 123 456" value={formData.phone} onChange={handleChange} onBlur={handleBlur} />
                             </FormField>
                             <FormField label="LinkedIn or GitHub URL" required error={errors.linkedIn}>
                                 <ProfileField value={formData.linkedIn} onChange={handleChange} onBlur={handleBlur} error={errors.linkedIn} />
