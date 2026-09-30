@@ -9,7 +9,7 @@ export const EVENT_CONFIG = {
     forceCloseRegistration: false,
 
     eventName: "DevFest Lebanon 2026 — Be Part of It",
-    eventDescription: "A day of ideas, hands-on learning, and new connections. Join GDG Lebanon to explore technology and meet the people building what’s next."
+    eventDescription: "A day of ideas, hands-on learning, and new connections. Join us at BAU Tripoli on October 17th to explore technology and meet the people building what’s next."
 };
 
 export const isRegistrationOpen = () => {

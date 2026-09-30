@@ -18,9 +18,7 @@ import { EVENT_CONFIG, isRegistrationOpen } from './config'
 import { FormField } from './components/FormField'
 import { SearchableSelect } from './components/SearchableSelect'
 import './App.css'
-import AttendeeLogin from './components/AttendeeLogin'
-import VerificationStep, { readPending, PENDING_KEY } from './components/VerificationStep'
-import { api } from './lib/registration'
+import { submitRegistration, isValidFamiliarity } from './lib/registration'
 
 const UNIVERSITIES = [
     {
@@ -282,6 +280,7 @@ const App = () => {
         status: '', // Derived from experience (student/prof/fresh)
         company: '',
         university: '',
+        major: '',
         referral: '',
         referralOtherText: '',
         referralPartnerText: '',
@@ -292,14 +291,14 @@ const App = () => {
         phone: '',
         attendedBefore: 3, // Defaulting to "No" (index 3) or could leave null
         takeaways: [],
+        otherTakeawaysInput: '',
         techInterests: [],
+        googleFamiliarity: '',
         otherTechInterestInput: '',
         comments: '',
         attendanceType: ''
     })
 
-    const [pending, setPending] = useState(readPending)
-    const [verifiedUser, setVerifiedUser] = useState(null)
     const [submitError, setSubmitError] = useState('')
     const [errors, setErrors] = useState({})
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -395,6 +394,7 @@ const App = () => {
         if (formData.attendedBefore === '') newErrors.attendedBefore = 'Please select an option';
         if (formData.takeaways.length === 0) newErrors.takeaways = 'Please select your main takeaways';
         if (!formData.referral) newErrors.referral = 'Please select how you heard about us';
+        if (!isValidFamiliarity(formData.googleFamiliarity)) newErrors.googleFamiliarity = 'Please select a rating from 1 to 5';
         if (!formData.attendanceType) newErrors.attendanceType = 'Please select your expected attendance';
         if (!formData.company && !formData.university && !searchTerm) {
             newErrors.companySearch = 'Company or university is required. Search and select or add a new one.';
@@ -422,6 +422,7 @@ const App = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
         setSubmitError('');
         if (validate()) {
             setIsSubmitting(true);
@@ -434,14 +435,13 @@ const App = () => {
             }
             const submitData = { ...formData, referral: referralValue };
             try {
-                if (verifiedUser && verifiedUser.email?.toLowerCase() === formData.email.trim().toLowerCase()) {
-                    await api('register', { email: formData.email, form: submitData }, verifiedUser);
-                    setIsSuccess(true);
-                } else {
-                    const session = await api('pending', { email: formData.email, form: submitData });
-                    sessionStorage.setItem(PENDING_KEY, JSON.stringify(session));
-                    setPending(session);
-                }
+                await submitRegistration({
+                    ...submitData,
+                    organization: formData.company || UNIVERSITIES.find(u => u.abbreviation === formData.university)?.full_name || formData.university || searchTerm,
+                    experience: formData.activeExpCategories.map(category => `${category}: ${EXPERIENCE_CATEGORIES[category][formData.expLevels[category]]}`).join(', '),
+                    attendedBefore: DEVFEST_ATTENDANCE_OPTIONS[formData.attendedBefore].replace(/\n/g, ' '),
+                });
+                setIsSuccess(true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) { setSubmitError(error.message); }
             finally { setIsSubmitting(false); }
@@ -479,6 +479,7 @@ const App = () => {
             'attendedBefore',
             'referral',
             'takeaways',
+            'googleFamiliarity',
             'attendanceType'
         ];
 
@@ -518,6 +519,7 @@ const App = () => {
         if (currentData.attendedBefore === '') tempErrors.attendedBefore = 'Please select an option';
         if (currentData.takeaways.length === 0) tempErrors.takeaways = 'Please select your main takeaways';
         if (!currentData.referral) tempErrors.referral = 'Please select how you heard about us';
+        if (!isValidFamiliarity(currentData.googleFamiliarity)) tempErrors.googleFamiliarity = 'Please select a rating from 1 to 5';
         if (!currentData.attendanceType) tempErrors.attendanceType = 'Please select your expected attendance';
 
         // We also always check phone format specifically on blur if it has a value, regardless of order
@@ -576,7 +578,6 @@ const App = () => {
 
     const isProfessionalOrFreshGrad = formData.status === 'professional' || formData.status === 'fresh_graduate';
 
-    if (pending && !isSuccess) return <VerificationStep initial={pending} onDone={firstName => { setFormData(prev => ({ ...prev, firstName })); setPending(null); setIsSuccess(true); }} />;
 
     if (!isOpen) {
         return (
@@ -605,8 +606,8 @@ const App = () => {
                     className="success-message"
                 >
                     <CheckCircle2 size={64} className="success-icon" />
-                    <h1>Demo RSVP Complete!</h1>
-                    <p>Thank you, {formData.firstName}. Your demo registration is saved in this browser session. No RSVP or email has been sent.</p>
+                    <h1>Your submission is pending</h1>
+                    <p>Thank you, {formData.firstName}. Please wait for our email confirmation.</p>
                 </motion.div>
             </div>
         )
@@ -626,7 +627,7 @@ const App = () => {
 
             <main className="form-wrapper">
                 <form onSubmit={handleSubmit} className="single-page-form" noValidate>
-                    {submitError && <p role="alert" className="login-panel login-error">{submitError}</p>}
+                    {submitError && <p role="alert" className="submit-error">{submitError}</p>}
 
                     {isVip && (
                         <section className="form-section">
@@ -648,18 +649,8 @@ const App = () => {
 
                         <FormField label="Email" required error={errors.email}>
                             <input type="email" name="email" placeholder="your.email@example.com" aria-describedby="email-reminder" value={formData.email} onChange={handleChange} onBlur={handleBlur} />
-                            <p id="email-reminder" className="email-reminder">Please double-check your email address. You’ll be asked to verify it later to complete your registration.</p>
+                            <p id="email-reminder" className="email-reminder">Please double-check your email address before submitting.</p>
                         </FormField>
-
-                        <AttendeeLogin email={formData.email}
-                            onEmail={email => setFormData(prev => ({ ...prev, email }))}
-                            onVerified={setVerifiedUser}
-                            onProfile={profile => {
-                                const mapped = profile;
-                                setFormData(prev => ({ ...prev, ...mapped }));
-                                if (profile.company) setSearchTerm(profile.company);
-                                setErrors({});
-                            }} />
 
                         <div className="grid-2-always">
                             <FormField label="First Name" required error={errors.firstName}>
@@ -902,9 +893,7 @@ const App = () => {
                             <div className="badge-card">
                                 <div className="badge-name">{formData.firstName || 'Your'} {formData.lastName || 'Name'}</div>
                                 <div className="badge-role">
-                                    {formData.status === 'professional' ? 'Professional' :
-                                        formData.status === 'student' ? 'Student' :
-                                            formData.status === 'fresh_graduate' ? 'Fresh Graduate' : 'Attendee'}
+                                    {formData.specialization || 'Your Specialization'}
                                 </div>
                                 <div className="badge-company">{formData.company || UNIVERSITIES.find(u => u.abbreviation === formData.university)?.full_name || searchTerm || 'Company / University'}</div>
                                 <div className="badge-footer">GDG Lebanon RSVP</div>
@@ -1057,6 +1046,29 @@ const App = () => {
                                     />
                                 </div>
                             )}
+                        </FormField>
+                    </section>
+
+                    <section className="form-section">
+                        <FormField label="How familiar are you with Google technologies?" required error={errors.googleFamiliarity}>
+                            <select
+                                name="googleFamiliarity"
+                                aria-label="How familiar are you with Google technologies?"
+                                aria-required="true"
+                                aria-invalid={Boolean(errors.googleFamiliarity)}
+                                aria-describedby="familiarity-help"
+                                value={formData.googleFamiliarity}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                            >
+                                <option value="">Select a rating</option>
+                                <option value="1">1 — Not familiar</option>
+                                <option value="2">2 — Slightly familiar</option>
+                                <option value="3">3 — Moderately familiar</option>
+                                <option value="4">4 — Familiar</option>
+                                <option value="5">5 — Very familiar</option>
+                            </select>
+                            <p id="familiarity-help" className="email-reminder">Rate your familiarity from 1 (not familiar) to 5 (very familiar).</p>
                         </FormField>
                     </section>
 
