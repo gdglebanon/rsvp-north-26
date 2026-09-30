@@ -385,9 +385,9 @@ const App = () => {
         }
 
         if (!formData.linkedIn) {
-            newErrors.linkedIn = 'LinkedIn Link is required';
-        } else if (!/^https?:\/\/(www\.)?linkedin\.com\/.*$/.test(formData.linkedIn)) {
-            newErrors.linkedIn = 'Please provide a valid LinkedIn URL';
+            newErrors.linkedIn = 'LinkedIn or GitHub URL is required';
+        } else if (!/^https?:\/\/(www\.)?(linkedin\.com|github\.com)\/.*$/.test(formData.linkedIn)) {
+            newErrors.linkedIn = 'Please provide a valid LinkedIn or GitHub URL';
         }
 
         if (!formData.region) newErrors.region = 'Please select a region';
@@ -497,9 +497,9 @@ const App = () => {
         if (!currentData.firstName) tempErrors.firstName = 'First name is required';
         if (!currentData.lastName) tempErrors.lastName = 'Last name is required';
         if (!currentData.linkedIn) {
-            tempErrors.linkedIn = 'LinkedIn Link is required';
-        } else if (!/^https?:\/\/(www\.)?linkedin\.com\/.*$/.test(currentData.linkedIn)) {
-            tempErrors.linkedIn = 'Please provide a valid LinkedIn URL';
+            tempErrors.linkedIn = 'LinkedIn or GitHub URL is required';
+        } else if (!/^https?:\/\/(www\.)?(linkedin\.com|github\.com)\/.*$/.test(currentData.linkedIn)) {
+            tempErrors.linkedIn = 'Please provide a valid LinkedIn or GitHub URL';
         }
         if (!currentData.region) tempErrors.region = 'Please select a region';
         if (currentData.activeExpCategories.length === 0) tempErrors.experience = 'Please select at least one experience category';
@@ -665,8 +665,8 @@ const App = () => {
                             <FormField label="Phone Number" error={errors.phone}>
                                 <input type="tel" name="phone" placeholder="+961 XX XXX XXX" value={formData.phone} onChange={handleChange} onBlur={handleBlur} />
                             </FormField>
-                            <FormField label="LinkedIn Profile Link" required error={errors.linkedIn}>
-                                <input type="url" name="linkedIn" placeholder="https://linkedin.com/in/..." value={formData.linkedIn} onChange={handleChange} onBlur={handleBlur} />
+                            <FormField label="LinkedIn or GitHub URL" required error={errors.linkedIn}>
+                                <input type="url" name="linkedIn" placeholder="https://linkedin.com/in/... or https://github.com/..." value={formData.linkedIn} onChange={handleChange} onBlur={handleBlur} />
                             </FormField>
                         </div>
 
