@@ -940,3 +940,42 @@
     background-color: #fffaf9;
 }
 .submit-error { margin: 12px 0 24px; padding: 16px; border: 1px solid #b3261e; border-radius: 12px; color: #b3261e; background: #fffaf9; }
+
+.form-field, .field-input-container { min-width: 0; }
+.grid-2, .grid-2-always { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.contact-grid .field-label { min-height: 2.5em; }
+.profile-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 4px 8px 4px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    background: #f8faff;
+}
+.profile-icon { flex-shrink: 0; color: var(--google-blue); }
+.profile-username { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.profile-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 8px;
+    color: #1967d2;
+    font-weight: 600;
+    font-size: 13px;
+}
+.profile-edit:focus-visible { outline: 2px solid var(--google-blue); border-radius: 6px; }
+@media (max-width: 600px) {
+    .grid-2, .contact-grid { grid-template-columns: minmax(0, 1fr); }
+    .contact-grid .field-label { min-height: 0; }
+    .app-container { padding: 24px 12px; }
+    .form-section { padding: 20px 16px; }
+    .field-label { font-size: 13px; line-height: 1.4; }
+    .field-input-container input, .field-input-container select, .field-input-container textarea { font-size: 16px; padding: 12px; }
+    .header-text h1 { font-size: 21px; }
+    .header-text p { font-size: 14px; }
+}

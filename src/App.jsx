@@ -18,6 +18,8 @@ import { EVENT_CONFIG, isRegistrationOpen } from './config'
 import { FormField } from './components/FormField'
 import { SearchableSelect } from './components/SearchableSelect'
 import './App.css'
+import ProfileField from './components/ProfileField'
+import { parseProfile } from './lib/profile'
 import { submitRegistration, isValidFamiliarity } from './lib/registration'
 
 const UNIVERSITIES = [
@@ -386,7 +388,7 @@ const App = () => {
 
         if (!formData.linkedIn) {
             newErrors.linkedIn = 'LinkedIn or GitHub URL is required';
-        } else if (!/^https?:\/\/(www\.)?(linkedin\.com|github\.com)\/.*$/.test(formData.linkedIn)) {
+        } else if (!parseProfile(formData.linkedIn)) {
             newErrors.linkedIn = 'Please provide a valid LinkedIn or GitHub URL';
         }
 
@@ -498,7 +500,7 @@ const App = () => {
         if (!currentData.lastName) tempErrors.lastName = 'Last name is required';
         if (!currentData.linkedIn) {
             tempErrors.linkedIn = 'LinkedIn or GitHub URL is required';
-        } else if (!/^https?:\/\/(www\.)?(linkedin\.com|github\.com)\/.*$/.test(currentData.linkedIn)) {
+        } else if (!parseProfile(currentData.linkedIn)) {
             tempErrors.linkedIn = 'Please provide a valid LinkedIn or GitHub URL';
         }
         if (!currentData.region) tempErrors.region = 'Please select a region';
@@ -661,12 +663,12 @@ const App = () => {
                             </FormField>
                         </div>
 
-                        <div className="grid-2-always">
+                        <div className="grid-2-always contact-grid">
                             <FormField label="Phone Number" error={errors.phone}>
                                 <input type="tel" name="phone" placeholder="+961 XX XXX XXX" value={formData.phone} onChange={handleChange} onBlur={handleBlur} />
                             </FormField>
                             <FormField label="LinkedIn or GitHub URL" required error={errors.linkedIn}>
-                                <input type="url" name="linkedIn" placeholder="https://linkedin.com/in/... or https://github.com/..." value={formData.linkedIn} onChange={handleChange} onBlur={handleBlur} />
+                                <ProfileField value={formData.linkedIn} onChange={handleChange} onBlur={handleBlur} error={errors.linkedIn} />
                             </FormField>
                         </div>
 
