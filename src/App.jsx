@@ -185,6 +185,12 @@ const UNIVERSITIES = [
         abbreviation: 'MU',
         alt_text: 'Al Maaref University, Almaaref, Al maaref, MU Uni, MU, Maaref'
     },
+    {
+        id: 'cis',
+        full_name: 'CIS College',
+        abbreviation: 'CIS',
+        alt_text: 'CIS College, CIS, CIS Lebanon, CIS Beirut'
+    },
 ];
 
 const REGIONS = [
@@ -223,7 +229,7 @@ const EXPERIENCE_CATEGORIES = {
 const SPECIALIZATIONS = [
     "AI Engineer", "AI Researcher", "Full Stack Developer", "Data Scientist", "Data Engineer",
     "Cloud Engineer", "DevOps Engineer", "Backend Developer", "Frontend Developer",
-    "Mobile Developer", "Product Manager", "Project Manager", "UX/UI Designer", "QA Engineer", "Other in tech", "Other non-tech"
+    "Mobile Developer", "Product Manager", "Project Manager", "UX/UI Designer", "QA Engineer", "Cybersecurity", "Other in tech", "Other non-tech"
 ]
 
 const UNIVERSITY_MAJORS = [
