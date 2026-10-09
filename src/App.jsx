@@ -616,6 +616,7 @@ const App = () => {
                     <CheckCircle2 size={64} className="success-icon" />
                     <h1>Your submission is pending</h1>
                     <p>Thank you, {formData.firstName}. Please wait for our email confirmation.</p>
+                    <p>Also please make sure you join are part of our official chapter on <a href="https://gdg.community.dev/gdg-north-lebanon/" target="_blank" rel="noopener noreferrer">GDG North Lebanon</a>.</p>
                 </motion.div>
             </div>
         )
