@@ -1,3 +1,4 @@
+import { applyAccessCode, isValidAccessCode } from './lib/access-codes';
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
@@ -265,16 +266,11 @@ const DEVFEST_ATTENDANCE_OPTIONS = [
 ]
 
 const App = () => {
-    const [isOpen, setIsOpen] = useState(true)
-    const [isVip, setIsVip] = useState(false)
+    const [isOpen, setIsOpen] = useState(isRegistrationOpen)
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        setIsVip(params.has('vip'));
-    }, []);
-
-    const [formData, setFormData] = useState({
-        secretCode: '',
+    const [formData, setFormData] = useState(() => ({
+        NewID: crypto.randomUUID(),
+        secretCode: 'RSVP26',
         email: '',
         firstName: '',
         lastName: '',
@@ -304,8 +300,8 @@ const App = () => {
         googleFamiliarity: '',
         otherTechInterestInput: '',
         comments: '',
-        attendanceType: ''
-    })
+        attendanceType: 'networking'
+    }))
 
     const [submitError, setSubmitError] = useState('')
     const [errors, setErrors] = useState({})
@@ -330,7 +326,8 @@ const App = () => {
     }, [])
 
     useEffect(() => {
-        setIsOpen(isRegistrationOpen());
+        const timer = setInterval(() => setIsOpen(isRegistrationOpen()), 1000);
+        return () => clearInterval(timer);
     }, [])
 
     useEffect(() => {
@@ -381,7 +378,7 @@ const App = () => {
 
     const validate = () => {
         const newErrors = {};
-        if (isVip && !formData.secretCode) newErrors.secretCode = 'Secret code is required';
+        if (!isValidAccessCode(formData.secretCode)) newErrors.secretCode = 'Enter a valid access code.';
         if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = 'Valid email is required';
         if (!formData.firstName) newErrors.firstName = 'First name is required';
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
@@ -431,6 +428,7 @@ const App = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
+        if (!isRegistrationOpen()) { setIsOpen(false); return; }
         setSubmitError('');
         if (validate()) {
             setIsSubmitting(true);
@@ -458,7 +456,9 @@ const App = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value,
+            ...(name === 'secretCode' ? { comments: applyAccessCode(prev.comments, value, prev.secretCode) } : {}),
+        }));
         // Clear error for this field while typing
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: null }));
@@ -491,16 +491,13 @@ const App = () => {
             'attendanceType'
         ];
 
-        // Add secret code to the beginning if VIP
-        if (isVip) {
-            fieldOrder.unshift('secretCode');
-        }
+        fieldOrder.unshift('secretCode');
 
         const currentIndex = fieldOrder.indexOf(currentFieldName);
 
         // Let's run full validation logically to get all possible errors
         const tempErrors = {};
-        if (isVip && !currentData.secretCode) tempErrors.secretCode = 'Secret code is required';
+        if (!isValidAccessCode(currentData.secretCode)) tempErrors.secretCode = 'Enter a valid access code.';
         if (!currentData.email || !/^\S+@\S+\.\S+$/.test(currentData.email)) tempErrors.email = 'Valid email is required';
         if (!currentData.firstName) tempErrors.firstName = 'First name is required';
         if (!currentData.lastName) tempErrors.lastName = 'Last name is required';
@@ -595,8 +592,8 @@ const App = () => {
                 </div>
                 <div className="closed-message">
                     <AlertTriangle size={48} className="warning-icon" />
-                    <h1>Registration Closed</h1>
-                    <p>Thank you for your interest! Registration for {EVENT_CONFIG.eventName} is now closed.</p>
+                    <h1>Registration is now closed</h1>
+                    <p>Please visit the info desk tomorrow to collect your visitor badge, starting at <strong>10:30 AM</strong>.</p>
                 </div>
             </div>
         )
@@ -638,20 +635,23 @@ const App = () => {
                 <form onSubmit={handleSubmit} className="single-page-form" noValidate>
                     {submitError && <p role="alert" className="submit-error">{submitError}</p>}
 
-                    {isVip && (
+                    {
                         <section className="form-section">
                             <h2>Access & Security</h2>
                             <FormField label="Secret Code" required error={errors.secretCode}>
                                 <input
                                     type="text"
                                     name="secretCode"
-                                    placeholder="Enter your VIP or general access code"
+                                    placeholder="Enter your access code"
                                     value={formData.secretCode}
                                     onChange={handleChange}
                                 />
                             </FormField>
+                            {formData.secretCode.trim().toUpperCase() === 'RSVP26' && (
+                                <p role="note">If you don’t have a ticket, please join us starting at <strong>10:30 AM</strong> for the Visitor Experience.</p>
+                            )}
                         </section>
-                    )}
+                    }
 
                     <section className="form-section">
                         <h2>Personal Information</h2>
@@ -1087,91 +1087,22 @@ const App = () => {
 
                         <FormField label="Expected Attendance Type" required error={errors.attendanceType}>
                             <div className="attendance-grid">
-                                <button
-                                    type="button"
-                                    className={`attendance-card ${formData.attendanceType === 'full_day' ? 'active active-blue' : ''}`}
-                                    onClick={() => {
-                                        const nextData = { ...formData, attendanceType: 'full_day' };
-                                        setFormData(nextData);
-                                        if (errors.attendanceType) setErrors(prev => ({ ...prev, attendanceType: null }));
-                                        validateUpTo('attendanceType', { attendanceType: 'full_day' });
-                                    }}
-                                >
-                                    <div className="card-top">
-                                        <Clock className="icon-blue" />
-                                        <div className="card-text">
-                                            <strong>Full Day Experience</strong>
-                                            <span>Attend all sessions and networking events.</span>
-                                        </div>
-                                    </div>
-                                    <div className="card-tag neutral">Standard Selection | Includes guaranteed lunch and swag</div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={`attendance-card ${formData.attendanceType === 'few_hours' ? 'active active-red' : ''}`}
-                                    onClick={() => {
-                                        const nextData = { ...formData, attendanceType: 'few_hours' };
-                                        setFormData(nextData);
-                                        if (errors.attendanceType) setErrors(prev => ({ ...prev, attendanceType: null }));
-                                        validateUpTo('attendanceType', { attendanceType: 'few_hours' });
-                                    }}
-                                >
-                                    <div className="card-top">
-                                        <Clock className="icon-red" />
-                                        <div className="card-text">
-                                            <strong>Flash Attendee (Few Hours)</strong>
-                                            <span>Quick visit to catch specific talks.</span>
-                                        </div>
-                                    </div>
-                                    <div className="card-tag high">High Selection | 1 Workshop Seat</div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={`attendance-card ${formData.attendanceType === 'networking' ? 'active active-yellow' : ''}`}
-                                    onClick={() => {
-                                        const nextData = { ...formData, attendanceType: 'networking' };
-                                        setFormData(nextData);
-                                        if (errors.attendanceType) setErrors(prev => ({ ...prev, attendanceType: null }));
-                                        validateUpTo('attendanceType', { attendanceType: 'networking' });
-                                    }}
-                                >
+                                <div className="attendance-card active active-yellow" aria-label="Visitor Experience, selected and cannot be changed">
                                     <div className="card-top">
                                         <Users className="icon-yellow" />
                                         <div className="card-text">
-                                            <strong>Networking Focused (Visitor)</strong>
+                                            <strong>Visitor Experience</strong>
                                             <span>Focus on making connections in the lobby and expo.</span>
                                         </div>
                                     </div>
-                                    <div className="card-tag high">High Selection | Session not guaranteed</div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={`attendance-card ${formData.attendanceType === 'afternoon' ? 'active active-green' : ''}`}
-                                    onClick={() => {
-                                        const nextData = { ...formData, attendanceType: 'afternoon' };
-                                        setFormData(nextData);
-                                        if (errors.attendanceType) setErrors(prev => ({ ...prev, attendanceType: null }));
-                                        validateUpTo('attendanceType', { attendanceType: 'afternoon' });
-                                    }}
-                                >
-                                    <div className="card-top">
-                                        <Sunset className="icon-green" />
-                                        <div className="card-text">
-                                            <strong>Afternoon attendee</strong>
-                                            <span>Access only starting 13:30 till the end of the day.</span>
-                                        </div>
-                                    </div>
-                                    <div className="card-tag danger">Limited Access</div>
-                                </button>
+                                    <div className="card-tag high">Selected automatically · Session not guaranteed</div>
+                                </div>
                             </div>
                         </FormField>
 
                         <div className="disclaimer-alert">
                             <Utensils size={28} className="icon" />
-                            <p>Important Note: Meals are guaranteed only for Full Day Experience attendees. Opting for a shorter, more targeted visit helps us accommodate more attendees and might increase your chances of being selected! As we try to have diverse attendees.</p>
+                            <p>Meals and session access are not guaranteed for Visitor Experience attendees.</p>
                         </div>
 
                         <FormField label="Additional Comments / 5min demo proposal (Optional)">

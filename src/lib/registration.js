@@ -1,6 +1,8 @@
+import { applyAccessCode, isValidAccessCode } from './access-codes.js';
 // Public field IDs from the supplied DevFest Google Form.
 export const FORM_ENDPOINT = 'https://docs.google.com/forms/d/e/1FAIpQLScDTrRzdjQPncFCWutQ2nM8GyFUpvqLVabhrcY3dc3LNxYcYw/formResponse';
 export const FORM_FIELDS = {
+    NewID: '326468374',
     email: '295367295', firstName: '674041903', lastName: '1797548834',
     phone: '630991022', linkedIn: '1089718516', region: '1070627913',
     ageRange: '975849543', gender: '1233592363', specialization: '175051641',
@@ -9,15 +11,13 @@ export const FORM_FIELDS = {
     attendanceType: '313950534', googleFamiliarity: '327953436', comments: '204822568',
 };
 export const isValidFamiliarity = value => /^[1-5]$/.test(String(value));
-const attendanceLabels = {
-    full_day: 'Full Day Experience', few_hours: 'Flash Attendee (Few Hours)',
-    networking: 'Networking Focused (Visitor)', afternoon: 'Afternoon attendee',
-};
 const selections = (values = [], other = '') => values.map(value =>
     value === 'Other' && other.trim() ? `Other: ${other.trim()}` : value
 ).join(', ');
 
 export function buildSubmission(form) {
+    if (!isValidAccessCode(form.secretCode)) throw new Error('Enter a valid access code.');
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(form.NewID || '')) throw new Error('Missing registration ID. Reload the form and try again.');
     if (!isValidFamiliarity(form.googleFamiliarity)) throw new Error('Please select a rating from 1 to 5.');
     const email = String(form.email || '').trim();
     if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Enter a valid email.');
@@ -27,8 +27,8 @@ export function buildSubmission(form) {
         experience: [form.experience, form.major?.trim() && `Major: ${form.major.trim()}`].filter(Boolean).join(', '),
         takeaways: selections(form.takeaways, form.otherTakeawaysInput),
         techInterests: selections(form.techInterests, form.otherTechInterestInput),
-        attendanceType: attendanceLabels[form.attendanceType] || form.attendanceType,
-        comments: form.comments?.trim() || 'No additional comments',
+        attendanceType: 'Visitor Experience',
+        comments: applyAccessCode(form.comments, form.secretCode).trim() || 'No additional comments',
     };
     // Only mapped answers are transmitted; access codes and local UI state are excluded.
     return new URLSearchParams(Object.entries(FORM_FIELDS).map(([key, id]) =>
