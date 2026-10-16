@@ -50,3 +50,15 @@ to Additional Comments while preserving attendee text. Switching codes replaces
 the previous marker. Visitor Experience is selected automatically and cannot be
 changed; submission mapping enforces it too. This remains a direct Google Forms
 flow with no backend or sign-in dependency.
+
+
+After sending to Google Forms, the page also sends the Confirm Participation
+request from `sendToBevy.html` to Bevy in the background. It posts JSON to event
+`131276` with ticket `82068`, survey `393635`, the same survey field mappings,
+and `signup_consent: true`. It uses the submitted name, email, organization,
+referral, experience, and Google familiarity score directly; it does not fetch
+an attendee from Apps Script. Access codes, comments, and NewID are not sent to Bevy.
+The background request never changes or delays the visible result. A duplicate
+waitlist response is treated as already completed; other failures produce a
+non-personal console warning and are not retried automatically. The browser
+cannot guarantee delivery after a network failure or page shutdown.

@@ -1,3 +1,4 @@
+import { BEVY_ENDPOINT } from '../src/lib/bevy.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSubmission, submitRegistration, isValidFamiliarity, FORM_ENDPOINT } from '../src/lib/registration.js';
@@ -34,6 +35,7 @@ test('requires a whole-number familiarity rating between 1 and 5', () => {
 test('submits directly without authentication and does not claim confirmed receipt', async () => {
     let calls = 0;
     const result = await submitRegistration(form, async (url, options) => {
+        if (url === BEVY_ENDPOINT) return {ok: true};
         calls++;
         assert.equal(url, FORM_ENDPOINT);
         assert.equal(options.method, 'POST');
@@ -88,7 +90,8 @@ for (const [code, marker] of [['RSVP26',''], ['Speaker','SPEAKER_EXTERNAL'], ['P
         const input = {...form, secretCode: code, comments: 'My proposal'};
         const expected = ['My proposal', marker].filter(Boolean).join('\n');
         assert.equal(buildSubmission(input).get('entry.204822568'), expected);
-        await submitRegistration(input, async (_, options) => {
+        await submitRegistration(input, async (url, options) => {
+            if (url === BEVY_ENDPOINT) return {ok: true};
             assert.equal(options.body.get('entry.326468374'), form.NewID);
             assert.equal(options.body.get('entry.204822568'), expected);
             assert.equal(options.body.get('entry.313950534'), 'Visitor Experience');

@@ -1,3 +1,4 @@
+import { confirmBevyInBackground } from './bevy.js';
 import { applyAccessCode, isValidAccessCode } from './access-codes.js';
 // Public field IDs from the supplied DevFest Google Form.
 export const FORM_ENDPOINT = 'https://docs.google.com/forms/d/e/1FAIpQLScDTrRzdjQPncFCWutQ2nM8GyFUpvqLVabhrcY3dc3LNxYcYw/formResponse';
@@ -44,6 +45,7 @@ export async function submitRegistration(form, send = fetch) {
         });
         // Cross-origin no-cors responses are opaque, so receipt cannot be verified.
         if (response.type !== 'opaque' && !response.ok) throw new Error('Request rejected');
+        void confirmBevyInBackground(form, send);
         return { receiptConfirmed: false };
     } catch {
         throw new Error('Unable to send your RSVP request. Check your connection and try again.');
