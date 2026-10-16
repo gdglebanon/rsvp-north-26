@@ -13,8 +13,8 @@ const form = {
 
 test('matches the Confirm Participation payload, including all survey fields', () => {
     assert.deepEqual(buildBevySubmission(form), {
-        ticket: 82068, first_name: 'Test', last_name: 'Speaker', email: 'test@example.com',
-        company: 'Test Company', signup_consent: true,
+        ticket: 83923, first_name: 'Test', last_name: 'Speaker', email: 'test@example.com',
+        signup_consent: true,
         event_survey_entry: {survey: 393635, fields: {
             '2034556': null, '2034557': 'Social media', '2034558': '3-5 years',
             '2034559': '4 - Advanced', '2034560': 'Test Company', '2034561': null,
@@ -70,4 +70,27 @@ test('failed primary submissions do not create a Bevy registration', async () =>
         calls.push(url); throw new Error('offline');
     }));
     assert.deepEqual(calls, [FORM_ENDPOINT]);
+});
+
+
+test('matches the supplied new-ticket example exactly', () => {
+    assert.deepEqual(buildBevySubmission({firstName: 'Google', lastName: 'Lebanon', email: 'info@gdglebanon.com', referral: 'GDG Website / Newsletter', googleFamiliarity: 2}), {
+        ticket: 83923, first_name: 'Google', last_name: 'Lebanon', email: 'info@gdglebanon.com',
+        event_survey_entry: {survey: 393635, fields: {
+            '2034556': null, '2034557': 'Notified by this community', '2034558': null,
+            '2034559': '2 - Fundamental', '2034560': '', '2034561': null,
+        }}, signup_consent: true,
+    });
+});
+
+test('maps frontend choices to the supplied survey choices', () => {
+    for (const [referral, expected] of [
+        ['Social Media','Social media'], ['Friends / Colleagues','Recommended by a friend or peer'],
+        ['partner: Example','Recommended by a friend or peer'], ['Meetup.com','Meetup.com'],
+        ['Other community events','Other'],
+    ]) assert.equal(buildBevySubmission({...form, referral}).event_survey_entry.fields['2034557'], expected);
+    for (const [experience, expected] of [
+        ['',null], ['Professional: Intern','Up to 1 year'], ['Professional: < 1 year','Up to 1 year'],
+        ['Student: Year 3, Professional: 3 - 5 years','3-5 years'],
+    ]) assert.equal(buildBevySubmission({...form, experience}).event_survey_entry.fields['2034558'], expected);
 });

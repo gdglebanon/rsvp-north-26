@@ -53,8 +53,8 @@ flow with no backend or sign-in dependency.
 
 
 After sending to Google Forms, the page also sends the Confirm Participation
-request from `sendToBevy.html` to Bevy in the background. It posts JSON to event
-`131276` with ticket `82068`, survey `393635`, the same survey field mappings,
+request using the supplied Bevy pre-order survey schema to Bevy in the background. It posts JSON to event
+`131276` with ticket `83923`, survey `393635`, survey fields `2034556`–`2034561` and their allowed choices,
 and `signup_consent: true`. It uses the submitted name, email, organization,
 referral, experience, and Google familiarity score directly; it does not fetch
 an attendee from Apps Script. Access codes, comments, and NewID are not sent to Bevy.
