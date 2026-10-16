@@ -40,7 +40,7 @@ Event settings and registration deadline are in `src/config.js`. Use
 
 Registration stays closed until October 17, 2026 at 08:00 Lebanon time (05:00 UTC).
 Before opening, visitors see: “Registration is now closed. Please visit the info desk
-tomorrow to collect your visitor badge, starting at 10:30 AM.” Open pages update automatically.
+tomorrow if you are not registered to get your visitor badge (no lunch meal guarantee), only starting at 10:30 AM.” Open pages update automatically.
 At opening, the form displays the prefilled `RSVP26` code and a note inviting people
 without a ticket to join the Visitor Experience from 10:30 AM.
 

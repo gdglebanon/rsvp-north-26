@@ -593,7 +593,7 @@ const App = () => {
                 <div className="closed-message">
                     <AlertTriangle size={48} className="warning-icon" />
                     <h1>Registration is now closed</h1>
-                    <p>Please visit the info desk tomorrow to collect your visitor badge, starting at <strong>10:30 AM</strong>.</p>
+                    <p>Please visit the info desk tomorrow if you are not registered to get your visitor badge (no lunch meal guarantee), only starting at <strong>10:30 AM</strong>.</p>
                 </div>
             </div>
         )
