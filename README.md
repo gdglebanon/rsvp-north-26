@@ -41,8 +41,9 @@ Event settings and registration deadline are in `src/config.js`. Use
 Registration stays closed until October 17, 2026 at 08:00 Lebanon time (05:00 UTC).
 Before opening, visitors see: “Registration is now closed. Please visit the info desk
 tomorrow if you are not registered to get your visitor badge (no lunch meal guarantee), only starting at 10:30 AM.” Open pages update automatically.
-At opening, the form displays the prefilled `RSVP26` code and a note inviting people
-without a ticket to join the Visitor Experience from 10:30 AM.
+At opening, the Secret Code field is blank and attendees must enter their code.
+Entering `RSVP26` displays a note inviting people without a ticket to join the
+Visitor Experience from 10:30 AM. The code is not shown as a hint or prefilled.
 
 The four case-insensitive codes are `RSVP26`, `Speaker`, `Partner`, and `Volunteer`.
 Role codes append `SPEAKER_EXTERNAL`, `PARTNER_EXTERNAL`, or `VOLUNTEER_EXTERNAL`

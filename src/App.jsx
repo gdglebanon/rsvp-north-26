@@ -270,7 +270,7 @@ const App = () => {
 
     const [formData, setFormData] = useState(() => ({
         NewID: crypto.randomUUID(),
-        secretCode: 'RSVP26',
+        secretCode: '',
         email: '',
         firstName: '',
         lastName: '',
